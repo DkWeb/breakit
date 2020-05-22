@@ -15,6 +15,7 @@
             const PADDLE_WIDTH = 100;
             const PADDLE_THICKNESS = 10;
             const PADDLE_DIST_FROM_EDGE = 60;
+            const BALL_RADIUS = 10;
             var paddleX = 400;
             var mouseX;
             var mouseY;
@@ -105,7 +106,8 @@
                         var paddleBottomEdgeY = paddleTopEdgeY + PADDLE_THICKNESS;
                         var paddleLeftEdgeX = paddleX;
                         var paddleRightEdgeX = paddleX + PADDLE_WIDTH;
-                        if (ballY > paddleTopEdgeY && ballY < paddleBottomEdgeY && 
+
+                        if ((ballY + BALL_RADIUS) > paddleTopEdgeY && ballY < paddleBottomEdgeY && 
                             ballX > paddleLeftEdgeX && ballX < paddleRightEdgeX) {
                             ballSpeedY *= -1;
                             var centerOfX = paddleLeftEdgeX + PADDLE_WIDTH / 2;
@@ -123,7 +125,7 @@
                 function drawAll() {                    
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
                     drawBricks();
-                    colorCircle(ballX, ballY, 10, 'white');                    
+                    colorCircle(ballX, ballY, BALL_RADIUS, 'white');                    
                     colorRect(paddleX, canvas.height - PADDLE_DIST_FROM_EDGE, PADDLE_WIDTH, PADDLE_THICKNESS, 'white');
                     var mouseBrickCol = Math.floor(mouseX / BRICK_WIDTH);
                     var mouseBrickRow = Math.floor(mouseY / BRICK_HEIGHT);
@@ -175,6 +177,9 @@
                 function ballReset() {
                     ballX = canvas.width / 2;
                     ballY = canvas.height / 2;
+                    // ballX = 30;
+                    // ballY = 30;
+
                 }
 
                 function brickReset() {
