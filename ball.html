@@ -2,6 +2,7 @@
 <html>
     <head>
         <title></title>
+        <script type="text/javascript" src="particle_explosion.js"></script>
     </head>
     <body>
         <canvas id="myCanvas" width="800" height="600">            
@@ -26,6 +27,7 @@
             const BRICK_GAP = 2;
             var brickGrid = new Array(BRICK_COLS * BRICK_ROWS);
             var bricksLeft;
+            var explosions = [];
 
             var canvas, canvasContext;
             window.onload = function() {
@@ -47,6 +49,7 @@
                     ballMove();
                     ballBrickHandling();
                     ballPaddleHandling();
+                    explosionsHandling();
 
                     function ballMove() {
                         ballX += ballSpeedX;
@@ -63,6 +66,7 @@
                             // Ball left bottom of the screen
                             ballReset();
                             brickReset();
+                            explosionsReset();
                         }   
                     }
 
@@ -74,6 +78,7 @@
                         if (ballBrickCol >= 0 && ballBrickCol < BRICK_COLS && 
                             ballBrickRow >= 0 && ballBrickRow < BRICK_ROWS &&
                             isBrickAtColRow(ballBrickCol, ballBrickRow)) {
+                            explosions.push(particleGenerator.startExplosion(60, 100, ballX, ballY));
                             brickGrid[ballBrickIndex] = false;
                             bricksLeft--;
                             var prevBallX = ballX - ballSpeedX;
@@ -120,11 +125,28 @@
                             }
                         }
                     }
+
+                    function explosionsHandling() {
+                        if (explosions.length === 0) {
+                            return;
+                        }
+                        var remainingExplosions = [];
+                        for (var i = 0; i < explosions.length; i++) {
+                            if (particleGenerator.updateNewFrame(explosions[i])) {
+                                remainingExplosions.push(explosions[i]);
+                            } else {
+                                // console.log(explosions[i].particlesTotal);
+                                // console.log('Living time: ' + (Date.now() - explosions[i].start))
+                            }
+                        }
+                        explosions = remainingExplosions;
+                    }
                 }
 
                 function drawAll() {                    
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
                     drawBricks();
+                    drawExplosions();
                     colorCircle(ballX, ballY, BALL_RADIUS, 'white');                    
                     colorRect(paddleX, canvas.height - PADDLE_DIST_FROM_EDGE, PADDLE_WIDTH, PADDLE_THICKNESS, 'white');
                     var mouseBrickCol = Math.floor(mouseX / BRICK_WIDTH);
@@ -135,19 +157,45 @@
                 }
 
                 function drawBricks() {
+                    canvasContext.fillStyle = 'green';
                     for (var r = 0; r < BRICK_ROWS; r++) {
                         for (var c = 0; c < BRICK_COLS; c++) {
                             if (brickGrid[colRowToArrayIndex(c, r)]) {
-                                colorRect(BRICK_WIDTH * c, BRICK_HEIGHT * r, BRICK_WIDTH - BRICK_GAP, BRICK_HEIGHT - BRICK_GAP, 'green');
+                                colorRectWithoutChangeColor(BRICK_WIDTH * c, BRICK_HEIGHT * r, BRICK_WIDTH - BRICK_GAP, BRICK_HEIGHT - BRICK_GAP);
                             }
+                        }
+                    }
+                }
+
+                function drawExplosions() {
+                    for (var i = 0; i < explosions.length; i++) {
+                        var explosion = explosions[i];
+                        var color = calcRandomColorBetweenRGBAString(255, 0, 0, 1, 255, 255, 0, 0.8);
+                        canvasContext.fillStyle = color;
+                        for (var j = 0; j < explosion.particles.length; j++) {
+                            var particle = explosion.particles[j];
+                            // if (j % 70 === 0) {
+                            //     color = calcRandomColorBetweenRGBAString(255, 0, 0, 1, 128, 255, 0, 0.8);
+                            //     canvasContext.fillStyle = color;
+                            // }
+                            colorRectWithoutChangeColor(particle.posX, particle.posY, 1, 1);
+                            // colorPixel(imageData, explosion.particles[j].posX, explosion.particles[j].posY, 255, 0, 0, 1);
+                            // console.log("Color: " + color);
+                            // colorRect(explosion.particles[j].posX, explosion.particles[j].posY, 1, 1, color);
+                            // colorRect(explosion.particles[j].posX, explosion.particles[j].posY, 1, 1, 'red');
                         }
                     }
                 }
 
                 function colorRect(topLeftX, topLeftY, width, height, fillColor) {
                     canvasContext.fillStyle = fillColor;
-                    canvasContext.fillRect(topLeftX, topLeftY, width, height);
+                    canvasContext.fillRect(~~(topLeftX), ~~(topLeftY), width, height);
                 }
+
+
+                function colorRectWithoutChangeColor(topLeftX, topLeftY, width, height) {
+                    canvasContext.fillRect(~~(topLeftX), ~~(topLeftY), width, height);
+                }                
 
                 function colorCircle(centerX, centerY, radius, fillColor) {
                     canvasContext.fillStyle = fillColor;
@@ -179,7 +227,6 @@
                     ballY = canvas.height / 2;
                     // ballX = 30;
                     // ballY = 30;
-
                 }
 
                 function brickReset() {
@@ -194,6 +241,10 @@
                     }
                 }
 
+                function explosionsReset() {
+                    explosions = [];
+                }
+                
                 function colRowToArrayIndex(col, row) {
                     return row * BRICK_COLS + col;
                 }
@@ -204,6 +255,13 @@
                             return brickGrid[colRowToArrayIndex(col, row)];
                     }
                     return false;
+                }
+
+                function calcRandomColorBetweenRGBAString(r1, g1, b1, a1, r2, g2, b2, a2) {
+                    var factor = Math.random();
+                    var parts = [ ~~(r1 + factor * (r2 - r1)),  ~~(g1 + factor *(g2 - g1)), ~~(b1 + factor * (b2 - b1)), (a1 + factor * (a2 - a1)) ];
+                    return 'rgba(' + parts.join(',') + ')';
+                    // return 'rgba(' + Math.floor(r1 + factor * (r2 - r1)) + ',' + Math.floor(g1 + factor *(g2 - g1)) + ',' + Math.floor(b1 + factor * (b2 - b1)) + ',' + (a1 + factor * (a2 - a1)) + ')';
                 }
 
             }
