@@ -3,6 +3,7 @@
     <head>
         <title></title>
         <script type="text/javascript" src="particle_explosion.js"></script>
+        <script type="text/javascript" src="persistence.js"></script>
     </head>
     <body>
         <canvas id="myCanvas" width="800" height="600">            
@@ -53,21 +54,85 @@
             var points;
             var explosions = [];
             var canvas, canvasContext;
-            const textFont = '1.2em monospace';
+            const TEXT_FONT = '1.2em monospace';
+            var waitingForPlayer = true;
+            var listenerAdded = false;
+            var currentHighscorePoints = 0;
+            const HIGH_SCORE_SAVE_NAME = 'highscore';
+            // One of 'INITIAL', 'PLAYING', 'HIGHSCORE'
+            var gameState = 'INITIAL';
 
             window.onload = function() {
                 canvas = document.getElementById('myCanvas');
                 canvasContext = canvas.getContext('2d');
-
                 var framesPerSecond = 30;
                 setInterval(updateAll, 1000 / framesPerSecond);
                 canvas.addEventListener('mousemove', updateMousePosition);
-                brickReset();
-                ballReset();
 
                 function updateAll() {
-                    moveAll();
-                    drawAll();
+                    if (gameState === 'INITIAL') {
+                        if (!listenerAdded) {
+                            objectStore.initStore('breakit', function() { 
+                                objectStore.loadObject(HIGH_SCORE_SAVE_NAME, function(highscore) {
+                                    if (highscore !== null && highscore !== undefined) {
+                                        currentHighscorePoints = highscore.points;
+                                    }
+                                    drawStartScreenAndWaitForClick();
+                                }, function() {
+                                    console.log("Unable to load highscore. Skip highscore handling");
+                                    currentHighscorePoints = Number.MAX_SAFE_INTEGER;                        
+                                    drawStartScreenAndWaitForClick();
+                                })
+                            }, function() {
+                                console.log("No indexdb possible on your system. Skip highscore handling");
+                                currentHighscorePoints = Number.MAX_SAFE_INTEGER;
+                                drawStartScreenAndWaitForClick();
+                            }, function() {
+                                console.log("You have probably disabled saving / loading functionality for this game. Skip highscore handling");
+                                currentHighscorePoints = Number.MAX_SAFE_INTEGER;
+                                drawStartScreenAndWaitForClick();
+                            });
+                        }
+                        listenerAdded = true;
+                    } else if (gameState === 'PLAYING') {
+                        moveAll();
+                        drawAll();
+                    } else {
+                        // gameState === 'HIGHSCORE'
+                        if (!listenerAdded) {
+                            if (points > currentHighscorePoints) {
+                                currentHighscorePoints = points;
+                                objectStore.saveObject({ "name": HIGH_SCORE_SAVE_NAME, "points": points}, drawHighscoreAndWaitForClick, function() {
+                                    console.log("Saving highscore failed. Skip it!");
+                                });
+                            } else {
+                                drawHighscoreAndWaitForClick();
+                            }
+                            listenerAdded = true;
+                        }
+                    }
+
+                    function restartOnClick() {
+                        waitingForPlayer = false;
+                        listenerAdded = false;
+                        window.removeEventListener("click", restartOnClick, false);   
+                        gameState = 'PLAYING';
+                        ballReset();
+                        brickReset();
+                        explosionsReset();
+                    }
+
+                    function drawHighscoreAndWaitForClick() {
+                        window.addEventListener ('click', restartOnClick, false);
+                        drawHighscore();
+                        gameStart = false;
+                    }
+
+                    function drawStartScreenAndWaitForClick() {
+                        window.addEventListener ('click', restartOnClick, false);
+                        drawStartScreen();
+                        gameStart = false;
+                    }
                 }
 
                 function moveAll() {
@@ -88,10 +153,8 @@
                         }  
 
                         if (ballY > canvas.height) {
-                            // Ball left bottom of the screen
-                            ballReset();
-                            brickReset();
-                            explosionsReset();
+                            // Ball left bottom of the screen -> one round is over
+                            gameState = 'HIGHSCORE';
                         }   
                     }
 
@@ -177,7 +240,7 @@
                     // var indexUnderMouse = colRowToArrayIndex(mouseBrickCol, mouseBrickRow);
                     //colorText(Math.floor(mouseBrickCol) + ',' + Math.floor(mouseBrickRow) + ':' + indexUnderMouse, mouseX, mouseY, 'yellow');
                     colorText("Left: " + bricksLeft, 10, 20, 'white');
-                    colorText("Points:" + points, 700, 20)
+                    colorText("Points:" + points, 700, 20, 'white')
                 }
 
                 function drawBricks() {
@@ -210,6 +273,15 @@
                     }
                 }
 
+                function drawHighscore() {
+                    colorText("Existing Highscore: " + currentHighscorePoints, 330, 270, 'white');
+                }
+
+                function drawStartScreen() {
+                    colorRect(0, 0, canvas.width, canvas.height, 'black');
+                    colorText('Welcome to breakit. Click to start!', 250, 270, 'white');
+                }
+
                 function colorRect(topLeftX, topLeftY, width, height, fillColor) {
                     canvasContext.fillStyle = fillColor;
                     canvasContext.fillRect(~~(topLeftX), ~~(topLeftY), width, height);
@@ -228,7 +300,7 @@
                 }
 
                 function colorText(text, textX, textY, fillColor) {
-                    canvasContext.font = textFont;
+                    canvasContext.font = TEXT_FONT;
                     canvasContext.fillStyle = fillColor;
                     canvasContext.fillText(text, textX, textY);
                 }
@@ -287,7 +359,6 @@
                     return 'rgba(' + parts.join(',') + ')';
                     // return 'rgba(' + Math.floor(r1 + factor * (r2 - r1)) + ',' + Math.floor(g1 + factor *(g2 - g1)) + ',' + Math.floor(b1 + factor * (b2 - b1)) + ',' + (a1 + factor * (a2 - a1)) + ')';
                 }
-
             }
         </script>
     </body>
