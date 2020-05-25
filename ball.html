@@ -147,7 +147,7 @@
                         if (!listenerAdded) {                            
                             if (points > currentHighscorePoints) {
                                 currentHighscorePoints = points;
-                                objectStore.saveObject({ "name": HIGH_SCORE_SAVE_NAME, "points": points}, drawHighscoreAndWaitForClick, function() {
+                                objectStore.saveObject({ "name": HIGH_SCORE_SAVE_NAME, "points": points}, waitForClick, function() {
                                     console.log("Saving highscore failed. Skip it!");
                                 });
                             } else {
@@ -400,14 +400,6 @@
                     var parts = [ ~~(r1 + factor * (r2 - r1)),  ~~(g1 + factor *(g2 - g1)), ~~(b1 + factor * (b2 - b1)), (a1 + factor * (a2 - a1)) ];
                     return 'rgba(' + parts.join(',') + ')';
                     // return 'rgba(' + Math.floor(r1 + factor * (r2 - r1)) + ',' + Math.floor(g1 + factor *(g2 - g1)) + ',' + Math.floor(b1 + factor * (b2 - b1)) + ',' + (a1 + factor * (a2 - a1)) + ')';
-                }
-
-                function checkForGyro() {
-                    window.addEventListener("devicemotion", function(event){
-    if(event.rotationRate.alpha || event.rotationRate.beta || event.rotationRate.gamma)
-        gyroPresent = true;
-});
-
                 }
             }
         </script>
