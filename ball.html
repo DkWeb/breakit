@@ -4,6 +4,7 @@
         <title></title>
         <script type="text/javascript" src="particle_explosion.js"></script>
         <script type="text/javascript" src="persistence.js"></script>
+        <link rel="stylesheet" type="text/css" href="index.css">
     </head>
     <body>
         <canvas id="myCanvas" width="800" height="600">            
@@ -14,17 +15,17 @@
             var ballY = 75;
             var ballSpeedX = 5;
             var ballSpeedY = 5;
-            const PADDLE_WIDTH = 100;
-            const PADDLE_THICKNESS = 10;
-            const PADDLE_DIST_FROM_EDGE = 60;
+            var paddleWidth = 100;
+            var paddleHeight = 10;
+            var paddleDistFromEdge = 60;
             const BALL_RADIUS = 10;
             var paddleX = 400;
             var mouseX;
             var mouseY;
             const BRICK_COLS = 10;
             const BRICK_ROWS = 14;
-            const BRICK_WIDTH = 80;
-            const BRICK_HEIGHT = 20;
+            var brickWidth = 80;
+            var brickHeight = 20;
             const BRICK_GAP = 2;
             var brickGridStart = [ 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -61,36 +62,74 @@
             const HIGH_SCORE_SAVE_NAME = 'highscore';
             // One of 'INITIAL', 'PLAYING', 'HIGHSCORE'
             var gameState = 'INITIAL';
+            const WIDTH_TO_HEIGHT_RATIO = 1.3333;
+            var xPosTextBricksLeft = 10;
+            var xPosTextPoints = 700;
+            var xPosTextWelcome = 250;
+            var xPosTextHighscore = 330;
+            var yPosTextHighscore = 270;
 
             window.onload = function() {
                 canvas = document.getElementById('myCanvas');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
                 canvasContext = canvas.getContext('2d');
                 var framesPerSecond = 30;
                 setInterval(updateAll, 1000 / framesPerSecond);
                 canvas.addEventListener('mousemove', updateMousePosition);
+                window.addEventListener('resize', onResize, false);
+                onResize();
+
+                function onResize() {
+                    var realWidth;
+                    var realHeight;
+                    var wantedWidth =  document.body.offsetHeight * WIDTH_TO_HEIGHT_RATIO;
+                    if (wantedWidth <= document.body.offsetWidth) {
+                        realWidth = wantedWidth;
+                        realHeight = document.body.offsetHeight;
+                    } else {
+                        realWidth = document.body.offsetWidth;
+                        realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
+                    }                    
+                    canvas.width = realWidth;
+                    canvas.height = realHeight;
+                    canvasContext = canvas.getContext('2d');
+                    brickWidth = Math.floor(canvas.width / BRICK_COLS);
+                    brickHeight = Math.floor(brickWidth / 4);
+                    paddleWidth = Math.floor(canvas.width / 8);
+                    paddleHeight = Math.floor(paddleWidth / 10);
+                    paddleDistFromEdge = Math.floor(canvas.height / 10);
+                    xPosTextBricksLeft = Math.floor(canvas.width * 0.0125);
+                    xPosTextPoints = Math.floor(canvas.width * 0.875);
+                    xPosTextWelcome = Math.floor(canvas.width * 0.3125);
+                    xPosTextHighscore = Math.floor(canvas.width * 0.4125);
+                    yPosTextHighscore =  Math.floor(canvas.height * 0.45);
+                    colorRect(0, 0, canvas.width, canvas.height, 'black');
+                }
 
                 function updateAll() {
                     if (gameState === 'INITIAL') {
+                        drawStartScreen();
                         if (!listenerAdded) {
                             objectStore.initStore('breakit', function() { 
                                 objectStore.loadObject(HIGH_SCORE_SAVE_NAME, function(highscore) {
                                     if (highscore !== null && highscore !== undefined) {
                                         currentHighscorePoints = highscore.points;
                                     }
-                                    drawStartScreenAndWaitForClick();
+                                    waitForClick();
                                 }, function() {
                                     console.log("Unable to load highscore. Skip highscore handling");
                                     currentHighscorePoints = Number.MAX_SAFE_INTEGER;                        
-                                    drawStartScreenAndWaitForClick();
+                                    waitForClick();
                                 })
                             }, function() {
                                 console.log("No indexdb possible on your system. Skip highscore handling");
                                 currentHighscorePoints = Number.MAX_SAFE_INTEGER;
-                                drawStartScreenAndWaitForClick();
+                                waitForClick();
                             }, function() {
                                 console.log("You have probably disabled saving / loading functionality for this game. Skip highscore handling");
                                 currentHighscorePoints = Number.MAX_SAFE_INTEGER;
-                                drawStartScreenAndWaitForClick();
+                                waitForClick();
                             });
                         }
                         listenerAdded = true;
@@ -99,14 +138,15 @@
                         drawAll();
                     } else {
                         // gameState === 'HIGHSCORE'
-                        if (!listenerAdded) {
+                        drawHighscore();
+                        if (!listenerAdded) {                            
                             if (points > currentHighscorePoints) {
                                 currentHighscorePoints = points;
                                 objectStore.saveObject({ "name": HIGH_SCORE_SAVE_NAME, "points": points}, drawHighscoreAndWaitForClick, function() {
                                     console.log("Saving highscore failed. Skip it!");
                                 });
                             } else {
-                                drawHighscoreAndWaitForClick();
+                                waitForClick();
                             }
                             listenerAdded = true;
                         }
@@ -122,15 +162,8 @@
                         explosionsReset();
                     }
 
-                    function drawHighscoreAndWaitForClick() {
+                    function waitForClick() {
                         window.addEventListener ('click', restartOnClick, false);
-                        drawHighscore();
-                        gameStart = false;
-                    }
-
-                    function drawStartScreenAndWaitForClick() {
-                        window.addEventListener ('click', restartOnClick, false);
-                        drawStartScreen();
                         gameStart = false;
                     }
                 }
@@ -159,8 +192,8 @@
                     }
 
                     function ballBrickHandling() {
-                        var ballBrickCol = Math.floor(ballX / BRICK_WIDTH);
-                        var ballBrickRow = Math.floor(ballY / BRICK_HEIGHT);
+                        var ballBrickCol = Math.floor(ballX / brickWidth);
+                        var ballBrickRow = Math.floor(ballY / brickHeight);
                         var ballBrickIndex = colRowToArrayIndex(ballBrickCol, ballBrickRow);
                         // console.log("col " + ballBrickCol);
                         if (ballBrickCol >= 0 && ballBrickCol < BRICK_COLS && 
@@ -172,8 +205,8 @@
                             bricksLeft--;
                             var prevBallX = ballX - ballSpeedX;
                             var prevBallY = ballY - ballSpeedY;
-                            var prevBrickCol = Math.floor(prevBallX / BRICK_WIDTH);
-                            var prevBrickRow = Math.floor(prevBallY / BRICK_HEIGHT);
+                            var prevBrickCol = Math.floor(prevBallX / brickWidth);
+                            var prevBrickRow = Math.floor(prevBallY / brickHeight);
                             var handledCollision = false;
                             if (prevBrickCol !== ballBrickCol) {
                                 var adjBrickSide = colRowToArrayIndex(prevBrickCol, ballBrickRow);
@@ -196,15 +229,15 @@
                     }
 
                     function ballPaddleHandling() {
-                        var paddleTopEdgeY = canvas.height - PADDLE_DIST_FROM_EDGE;
-                        var paddleBottomEdgeY = paddleTopEdgeY + PADDLE_THICKNESS;
+                        var paddleTopEdgeY = canvas.height - paddleDistFromEdge;
+                        var paddleBottomEdgeY = paddleTopEdgeY + paddleHeight;
                         var paddleLeftEdgeX = paddleX;
-                        var paddleRightEdgeX = paddleX + PADDLE_WIDTH;
+                        var paddleRightEdgeX = paddleX + paddleWidth;
 
                         if ((ballY + BALL_RADIUS) > paddleTopEdgeY && ballY < paddleBottomEdgeY && 
                             ballX > paddleLeftEdgeX && ballX < paddleRightEdgeX) {
                             ballSpeedY *= -1;
-                            var centerOfX = paddleLeftEdgeX + PADDLE_WIDTH / 2;
+                            var centerOfX = paddleLeftEdgeX + paddleWidth / 2;
                             var distFromCenter = ballX - centerOfX;
                             // console.log(distFromCenter);
                             ballSpeedX = distFromCenter * 0.35;
@@ -234,13 +267,9 @@
                     drawBricks();
                     drawExplosions();
                     colorCircle(ballX, ballY, BALL_RADIUS, 'white');                    
-                    colorRect(paddleX, canvas.height - PADDLE_DIST_FROM_EDGE, PADDLE_WIDTH, PADDLE_THICKNESS, 'white');
-                    // var mouseBrickCol = Math.floor(mouseX / BRICK_WIDTH);
-                    // var mouseBrickRow = Math.floor(mouseY / BRICK_HEIGHT);
-                    // var indexUnderMouse = colRowToArrayIndex(mouseBrickCol, mouseBrickRow);
-                    //colorText(Math.floor(mouseBrickCol) + ',' + Math.floor(mouseBrickRow) + ':' + indexUnderMouse, mouseX, mouseY, 'yellow');
-                    colorText("Left: " + bricksLeft, 10, 20, 'white');
-                    colorText("Points:" + points, 700, 20, 'white')
+                    colorRect(paddleX, canvas.height - paddleDistFromEdge, paddleWidth, paddleHeight, 'white');
+                    colorText("Left: " + bricksLeft, xPosTextBricksLeft, 20, 'white');
+                    colorText("Points:" + points, xPosTextPoints, 20, 'white')
                 }
 
                 function drawBricks() {
@@ -252,7 +281,7 @@
                                 for (var c = 0; c < BRICK_COLS; c++) {
                                     var brickTypeId = brickGrid[colRowToArrayIndex(c, r)];
                                     if (brickTypeId > 0 && brickId == brickTypeId) {
-                                        colorRectWithoutChangeColor(BRICK_WIDTH * c, BRICK_HEIGHT * r, BRICK_WIDTH - BRICK_GAP, BRICK_HEIGHT - BRICK_GAP);
+                                        colorRectWithoutChangeColor(brickWidth * c, brickHeight * r, brickWidth - BRICK_GAP, brickHeight - BRICK_GAP);
                                     }
                                 }
                             }
@@ -274,12 +303,12 @@
                 }
 
                 function drawHighscore() {
-                    colorText("Existing Highscore: " + currentHighscorePoints, 330, 270, 'white');
+                    colorText("Existing Highscore: " + currentHighscorePoints, xPosTextHighscore, yPosTextHighscore, 'white');
                 }
 
                 function drawStartScreen() {
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
-                    colorText('Welcome to breakit. Click to start!', 250, 270, 'white');
+                    colorText('Welcome to breakit. Click to start!', xPosTextWelcome, yPosTextHighscore, 'white');
                 }
 
                 function colorRect(topLeftX, topLeftY, width, height, fillColor) {
@@ -310,19 +339,12 @@
                     var root = document.documentElement;
                     mouseX = event.clientX - rect.left - root.scrollLeft;
                     mouseY = event.clientY - rect.top - root.scrollTop;
-                    paddleX = mouseX - PADDLE_WIDTH / 2;
-
-                    // ballX = mouseX;
-                    // ballY = mouseY;
-                    // ballSpeedX = 4;
-                    // ballSpeedY = -4;
+                    paddleX = mouseX - paddleWidth / 2;
                 }
 
                 function ballReset() {
                     ballX = canvas.width / 2;
                     ballY = canvas.height / 2;
-                    // ballX = 30;
-                    // ballY = 30;
                 }
 
                 function brickReset() {
