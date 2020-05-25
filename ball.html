@@ -68,6 +68,8 @@
             var xPosTextWelcome = 250;
             var xPosTextHighscore = 330;
             var yPosTextHighscore = 270;
+            var gyroPresent = false;
+            var touchLastPosX;
 
             window.onload = function() {
                 canvas = document.getElementById('myCanvas');
@@ -77,6 +79,9 @@
                 var framesPerSecond = 30;
                 setInterval(updateAll, 1000 / framesPerSecond);
                 canvas.addEventListener('mousemove', updateMousePosition);
+                canvas.addEventListener('touchstart', handleTouchStart, false);        
+                canvas.addEventListener('touchend', handleTouchEnd, false);    
+                canvas.addEventListener('touchmove', handleTouchMove, false);
                 window.addEventListener('resize', onResize, false);
                 onResize();
 
@@ -342,6 +347,21 @@
                     paddleX = mouseX - paddleWidth / 2;
                 }
 
+                function handleTouchStart(event) {
+                    const firstTouch = event.touches[0];                                      
+                    touchLastPosX = firstTouch.clientX;                                      
+                }
+
+                function handleTouchEnd(event) {
+                    touchLastPosX = null;                                      
+                }
+
+                function handleTouchMove(event) {
+                    var touchCurPosX = event.touches[0].clientX;
+                    paddleX += touchCurPosX - touchLastPosX;
+                    touchLastPosX = touchCurPosX;
+                }
+
                 function ballReset() {
                     ballX = canvas.width / 2;
                     ballY = canvas.height / 2;
@@ -380,6 +400,14 @@
                     var parts = [ ~~(r1 + factor * (r2 - r1)),  ~~(g1 + factor *(g2 - g1)), ~~(b1 + factor * (b2 - b1)), (a1 + factor * (a2 - a1)) ];
                     return 'rgba(' + parts.join(',') + ')';
                     // return 'rgba(' + Math.floor(r1 + factor * (r2 - r1)) + ',' + Math.floor(g1 + factor *(g2 - g1)) + ',' + Math.floor(b1 + factor * (b2 - b1)) + ',' + (a1 + factor * (a2 - a1)) + ')';
+                }
+
+                function checkForGyro() {
+                    window.addEventListener("devicemotion", function(event){
+    if(event.rotationRate.alpha || event.rotationRate.beta || event.rotationRate.gamma)
+        gyroPresent = true;
+});
+
                 }
             }
         </script>
