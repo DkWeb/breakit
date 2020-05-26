@@ -248,7 +248,7 @@
                             ballSpeedX = distFromCenter * 0.35;
                             
                             if (bricksLeft === 0) {
-                                brickReset();
+				gameState = 'HIGHSCORE';
                             }
                         }
                     }
@@ -365,6 +365,8 @@
                 function ballReset() {
                     ballX = canvas.width / 2;
                     ballY = canvas.height / 2;
+					ballSpeedX = 5;
+					ballSpeedY = 5;
                 }
 
                 function brickReset() {
