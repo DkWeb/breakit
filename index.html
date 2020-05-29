@@ -248,7 +248,7 @@
                             ballSpeedX = distFromCenter * 0.35;
                             
                             if (bricksLeft === 0) {
-				gameState = 'HIGHSCORE';
+                				gameState = 'HIGHSCORE';
                             }
                         }
                     }
@@ -350,14 +350,14 @@
                 function handleTouchStart(event) {
                     const firstTouch = event.touches[0];                                      
                     touchLastPosX = firstTouch.clientX; 
-                    if (event.target == canvas) {
+                    if (event.target == canvas && gameState === 'PLAYING') {
                         event.preventDefault();
                     }    
                 }
 
                 function handleTouchEnd(event) {
                     touchLastPosX = null;  
-                    if (event.target == canvas) {
+                    if (event.target == canvas && gameState === 'PLAYING') {
                         event.preventDefault();
                     }
                 }
@@ -366,7 +366,7 @@
                     var touchCurPosX = event.touches[0].clientX;
                     paddleX += touchCurPosX - touchLastPosX;
                     touchLastPosX = touchCurPosX;
-                    if (event.target == canvas) {
+                    if (event.target == canvas && gameState === 'PLAYING') {
                         event.preventDefault();
                     }
                 }
