@@ -350,22 +350,16 @@
                 function handleTouchStart(event) {
                     const firstTouch = event.touches[0];                                      
                     touchLastPosX = firstTouch.clientX;     
-                    event.preventDefault();
-                    event.stopImmediatePropagation();                      
                 }
 
                 function handleTouchEnd(event) {
                     touchLastPosX = null;  
-                    event.preventDefault(); 
-                    event.stopImmediatePropagation();    
                 }
 
                 function handleTouchMove(event) {
                     var touchCurPosX = event.touches[0].clientX;
                     paddleX += touchCurPosX - touchLastPosX;
                     touchLastPosX = touchCurPosX;
-                    event.preventDefault();
-                    event.stopImmediatePropagation();    
                 }
 
                 function ballReset() {
