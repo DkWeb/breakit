@@ -349,17 +349,26 @@
 
                 function handleTouchStart(event) {
                     const firstTouch = event.touches[0];                                      
-                    touchLastPosX = firstTouch.clientX;     
+                    touchLastPosX = firstTouch.clientX; 
+                    if (event.target == canvas) {
+                        event.preventDefault();
+                    }    
                 }
 
                 function handleTouchEnd(event) {
                     touchLastPosX = null;  
+                    if (event.target == canvas) {
+                        event.preventDefault();
+                    }
                 }
 
                 function handleTouchMove(event) {
                     var touchCurPosX = event.touches[0].clientX;
                     paddleX += touchCurPosX - touchLastPosX;
                     touchLastPosX = touchCurPosX;
+                    if (event.target == canvas) {
+                        event.preventDefault();
+                    }
                 }
 
                 function ballReset() {
