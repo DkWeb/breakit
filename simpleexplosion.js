@@ -1,4 +1,4 @@
-var particleGenerator = function() {
+var simpleExplosionGenerator = function() {
     return {
         startExplosion: function(durationInFrames, startParticleCount, posX, posY) {
             var explosion = {

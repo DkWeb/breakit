@@ -2,7 +2,7 @@
 <html>
     <head>
         <title></title>
-        <script type="text/javascript" src="particle_explosion.js"></script>
+        <script type="text/javascript" src="simpleexplosion.js"></script>
         <script type="text/javascript" src="persistence.js"></script>
         <link rel="stylesheet" type="text/css" href="index.css">
     </head>
@@ -106,7 +106,7 @@
                     paddleDistFromEdge = Math.floor(canvas.height / 10);
                     xPosTextBricksLeft = Math.floor(canvas.width * 0.0125);
                     xPosTextPoints = Math.floor(canvas.width * 0.875);
-                    xPosTextWelcome = Math.floor(canvas.width * 0.3125);
+                    xPosTextWelcome = Math.floor(canvas.width * 0.37);
                     xPosTextHighscore = Math.floor(canvas.width * 0.4125);
                     yPosTextHighscore =  Math.floor(canvas.height * 0.45);
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
@@ -204,7 +204,7 @@
                         if (ballBrickCol >= 0 && ballBrickCol < BRICK_COLS && 
                             ballBrickRow >= 0 && ballBrickRow < BRICK_ROWS &&
                             isBrickAtColRow(ballBrickCol, ballBrickRow)) {
-                            explosions.push(particleGenerator.startExplosion(60, 100, ballX, ballY));
+                            explosions.push(simpleExplosionGenerator.startExplosion(60, 100, ballX, ballY));
                             points += brickGrid[ballBrickIndex];
                             brickGrid[ballBrickIndex] = 0;
                             bricksLeft--;
@@ -259,7 +259,7 @@
                         }
                         var remainingExplosions = [];
                         for (var i = 0; i < explosions.length; i++) {
-                            if (particleGenerator.updateNewFrame(explosions[i])) {
+                            if (simpleExplosionGenerator.updateNewFrame(explosions[i])) {
                                 remainingExplosions.push(explosions[i]);
                             } 
                         }
