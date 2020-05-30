@@ -4,6 +4,7 @@
         <title></title>
         <script type="text/javascript" src="simpleexplosion.js"></script>
         <script type="text/javascript" src="persistence.js"></script>
+        <script type="text/javascript" src="textpositioner.js"></script>
         <link rel="stylesheet" type="text/css" href="index.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
@@ -71,6 +72,11 @@
             var yPosTextHighscore = 270;
             var gyroPresent = false;
             var touchLastPosX;
+            const WELCOME_TEXT = 'Welcome to breakit. Click to start!';   
+            const HIGHSCORE_TEXT = 'Existing Highscore: ';
+            const BRICKS_LEFT_TEXT = 'Left: ';
+            const SCORE_TEXT = 'Score: ';
+
 
             window.onload = function() {
                 canvas = document.getElementById('myCanvas');
@@ -91,10 +97,10 @@
                     var realHeight;
                     var wantedWidth =  document.body.offsetHeight * WIDTH_TO_HEIGHT_RATIO;
                     if (wantedWidth <= document.body.offsetWidth) {
-                        realWidth = wantedWidth;
+                        realWidth = Math.floor(wantedWidth);
                         realHeight = document.body.offsetHeight;
                     } else {
-                        realWidth = document.body.offsetWidth;
+                        realWidth = Math.floor(document.body.offsetWidth);
                         realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
                     }                    
                     canvas.width = realWidth;
@@ -105,10 +111,11 @@
                     paddleWidth = Math.floor(canvas.width / 8);
                     paddleHeight = Math.floor(paddleWidth / 10);
                     paddleDistFromEdge = Math.floor(canvas.height / 10);
-                    xPosTextBricksLeft = Math.floor(canvas.width * 0.0125);
-                    xPosTextPoints = Math.floor(canvas.width * 0.8);
-                    xPosTextWelcome = Math.floor(canvas.width * 0.25);
-                    xPosTextHighscore = Math.floor(canvas.width * 0.4125);
+                    canvasContext.font = TEXT_FONT;
+                    xPosTextBricksLeft = singleLineTextPositioner.calcLeftAlignX(BRICKS_LEFT_TEXT + 'XXX', canvasContext, 2);
+                    xPosTextPoints = singleLineTextPositioner.calcRightAlignX(SCORE_TEXT + 'XXX', canvasContext, 2);
+                    xPosTextWelcome = singleLineTextPositioner.calcCenterX(WELCOME_TEXT, canvasContext);
+                    xPosTextHighscore = singleLineTextPositioner.calcCenterX(HIGHSCORE_TEXT + 'XXX', canvasContext);
                     yPosTextHighscore =  Math.floor(canvas.height * 0.45);
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
                 }
@@ -274,8 +281,8 @@
                     drawExplosions();
                     colorCircle(ballX, ballY, BALL_RADIUS, 'white');                    
                     colorRect(paddleX, canvas.height - paddleDistFromEdge, paddleWidth, paddleHeight, 'white');
-                    colorText("Left: " + bricksLeft, xPosTextBricksLeft, 20, 'white');
-                    colorText("Points:" + points, xPosTextPoints, 20, 'white')
+                    colorText(BRICKS_LEFT_TEXT + bricksLeft, xPosTextBricksLeft, 20, 'white');
+                    colorText(SCORE_TEXT + points, xPosTextPoints, 20, 'white')
                 }
 
                 function drawBricks() {
@@ -309,12 +316,12 @@
                 }
 
                 function drawHighscore() {
-                    colorText("Existing Highscore: " + currentHighscorePoints, xPosTextHighscore, yPosTextHighscore, 'white');
+                    colorText(HIGHSCORE_TEXT + currentHighscorePoints, xPosTextHighscore, yPosTextHighscore, 'white');
                 }
 
                 function drawStartScreen() {
                     colorRect(0, 0, canvas.width, canvas.height, 'black');
-                    colorText('Welcome to breakit. Click to start!', xPosTextWelcome, yPosTextHighscore, 'white');
+                    colorText(WELCOME_TEXT, xPosTextWelcome, yPosTextHighscore, 'white');
                 }
 
                 function colorRect(topLeftX, topLeftY, width, height, fillColor) {
