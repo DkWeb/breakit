@@ -98,7 +98,7 @@
                     var wantedWidth =  document.body.offsetHeight * WIDTH_TO_HEIGHT_RATIO;
                     if (wantedWidth <= document.body.offsetWidth) {
                         realWidth = Math.floor(wantedWidth);
-                        realHeight = document.body.offsetHeight;
+                        realHeight = Math.floor(document.body.offsetHeight);
                     } else {
                         realWidth = Math.floor(document.body.offsetWidth);
                         realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
@@ -106,8 +106,8 @@
                     canvas.width = realWidth;
                     canvas.height = realHeight;
                     canvasContext = canvas.getContext('2d');
-                    brickWidth = Math.floor(canvas.width / BRICK_COLS);
-                    brickHeight = Math.floor(brickWidth / 4);
+                    brickWidth = canvas.width / BRICK_COLS;
+                    brickHeight = brickWidth / 4;
                     paddleWidth = Math.floor(canvas.width / 8);
                     paddleHeight = Math.floor(paddleWidth / 10);
                     paddleDistFromEdge = Math.floor(canvas.height / 10);
