@@ -117,7 +117,7 @@
                     xPosTextWelcome = singleLineTextPositioner.calcCenterX(WELCOME_TEXT, canvasContext);
                     xPosTextHighscore = singleLineTextPositioner.calcCenterX(HIGHSCORE_TEXT + 'XXX', canvasContext);
                     yPosTextHighscore =  Math.floor(canvas.height * 0.45);
-                    colorRect(0, 0, canvas.width, canvas.height, 'black');
+                    clearCanvas(0, 0, canvas.width, canvas.height);
                 }
 
                 function updateAll() {
@@ -275,8 +275,8 @@
                     }
                 }
 
-                function drawAll() {                    
-                    colorRect(0, 0, canvas.width, canvas.height, 'black');
+                function drawAll() {         
+                    clearCanvas(0, 0, canvas.width, canvas.height);           
                     drawBricks();
                     drawExplosions();
                     colorCircle(ballX, ballY, BALL_RADIUS, 'white');                    
@@ -329,6 +329,9 @@
                     canvasContext.fillRect(~~(topLeftX), ~~(topLeftY), width, height);
                 }
 
+                function clearCanvas(topLeftX, topLeftY, width, height) {
+                    canvasContext.clearRect(~~(topLeftX), ~~(topLeftY), width, height);
+                }
 
                 function colorRectWithoutChangeColor(topLeftX, topLeftY, width, height) {
                     canvasContext.fillRect(~~(topLeftX), ~~(topLeftY), width, height);
