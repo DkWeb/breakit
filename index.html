@@ -95,12 +95,12 @@
                 function onResize() {
                     var realWidth;
                     var realHeight;
-                    var wantedWidth =  document.body.offsetHeight * WIDTH_TO_HEIGHT_RATIO;
-                    if (wantedWidth <= document.body.offsetWidth) {
+                    var wantedWidth =  document.body.clientHeight * WIDTH_TO_HEIGHT_RATIO;
+                    if (wantedWidth <= document.body.clientWidth) {
                         realWidth = Math.floor(wantedWidth);
-                        realHeight = Math.floor(document.body.offsetHeight);
+                        realHeight = Math.floor(document.body.clientHeight);
                     } else {
-                        realWidth = Math.floor(document.body.offsetWidth);
+                        realWidth = Math.floor(document.body.clientWidth);
                         realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
                     }                    
                     canvas.width = realWidth;
