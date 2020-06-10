@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8"/>
         <title></title>
         <script type="text/javascript" src="simpleexplosion.js"></script>
         <script type="text/javascript" src="persistence.js"></script>
@@ -97,12 +98,12 @@
                 function onResize() {
                     var realWidth;
                     var realHeight;
-                    var wantedWidth =  document.body.offsetHeight * WIDTH_TO_HEIGHT_RATIO;
-                    if (wantedWidth <= document.body.offsetWidth) {
+                    var wantedWidth =  document.documentElement.clientHeight * WIDTH_TO_HEIGHT_RATIO;
+                    if (wantedWidth <= document.documentElement.clientWidth) {
                         realWidth = Math.floor(wantedWidth);
-                        realHeight = Math.floor(document.body.offsetHeight);
+                        realHeight = Math.floor(document.documentElement.clientHeight);
                     } else {
-                        realWidth = Math.floor(document.body.offsetWidth);
+                        realWidth = Math.floor(document.documentElement.clientWidth);
                         realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
                     }                    
                     canvas.width = realWidth;
