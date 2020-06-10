@@ -1,7 +1,7 @@
 {
         "name": "BreakIt",
         "short_name": "BreakIt",
-        "start_url": ".",
+        "start_url": "./index.html",
         "display": "standalone",
         "orientation":  "landscape"
 }
