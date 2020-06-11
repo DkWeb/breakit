@@ -15,6 +15,7 @@
         <canvas id="myCanvas" width="800" height="600">            
         </canvas>
 
+
         <script>
             var ballX = 75;
             var ballY = 75;
@@ -31,6 +32,7 @@
             const BRICK_ROWS = 14;
             var brickWidth = 80;
             var brickHeight = 20;
+            var isIOS = false;
             const BRICK_GAP = 2;
             var brickGridStart = [ 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -82,6 +84,7 @@
 
 
             window.onload = function() {
+                isIOS = isIOS();
                 canvas = document.getElementById('myCanvas');
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
@@ -93,15 +96,16 @@
                 canvas.addEventListener('touchend', handleTouchEnd, false);    
                 canvas.addEventListener('touchmove', handleTouchMove, false);
                 window.addEventListener('resize', onResize, false);
+                var runs = 0;
                 onResize();
-
-                function onResize() {
+                
+                function onResize() {                         
                     var realWidth;
                     var realHeight;
-                    var wantedWidth =  document.documentElement.clientHeight * WIDTH_TO_HEIGHT_RATIO;
+                    var wantedWidth =  getAvailableHeight() * WIDTH_TO_HEIGHT_RATIO;
                     if (wantedWidth <= document.documentElement.clientWidth) {
                         realWidth = Math.floor(wantedWidth);
-                        realHeight = Math.floor(document.documentElement.clientHeight);
+                        realHeight = Math.floor(getAvailableHeight());
                     } else {
                         realWidth = Math.floor(document.documentElement.clientWidth);
                         realHeight = Math.floor(realWidth / WIDTH_TO_HEIGHT_RATIO);
@@ -121,6 +125,25 @@
                     xPosTextHighscore = singleLineTextPositioner.calcCenterX(HIGHSCORE_TEXT + 'XXX', canvasContext);
                     yPosTextHighscore =  Math.floor(canvas.height * 0.45);
                     clearCanvas(0, 0, canvas.width, canvas.height);
+                }
+
+                // See 
+                // https://stackoverflow.com/questions/9038625/detect-if-device-is-ios and
+                // http://racase.com.np/javascript-how-to-detect-if-device-is-ios/
+                function isIOS() {                    
+                    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream || 
+                                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                    console.log("isIOS: " + isIOS);
+                    return isIOS;
+                }
+
+                function getAvailableHeight() {
+                    // clientHeight within iOS seems to include sometimes the browser address bar. So, we need to use innerHeight instead
+                    // Because we don't support scrolling this shouldn't make a difference
+                    if (isIOS) {
+                        return window.innerHeight;
+                    }
+                    return document.documentElement.clientHeight;
                 }
 
                 function updateAll() {
