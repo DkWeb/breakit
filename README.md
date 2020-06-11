@@ -9,3 +9,4 @@ You can have a try with the game under <https://dkweb.github.io/breakit/>
 * You can achieve a highscore
 * Paddle can be controlled via mouse or touch
 * Simple particle effects when hitting a brick
+* Icon for "Add to homescreen" feature of iOS
